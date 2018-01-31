@@ -98,6 +98,19 @@ let main = function(){
     let tab = tabs[0];
     isTargetTab(tab) ? setActivePopup() : setInactivePopup();
   });
+  
+  chrome.tabs.query({}, function(tabs){
+    tabs.filter(function(tab){
+      return targetUrls.some(function(t){
+        return new RegExp(t, "g").test(tab.url);
+      });
+    }).forEach(function(tab){
+      console.log(tab);
+      chrome.tabs.executeScript(tab.id, {
+        code: "window.postMessage({type: 'YES_I_M_HERE'}, window.location.toString());"
+      });
+    });
+  })
 };
 
 main();
