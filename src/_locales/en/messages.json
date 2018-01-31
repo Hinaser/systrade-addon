@@ -1,0 +1,28 @@
+{
+  "extensionName": {
+    "message": "SysTrade",
+    "description": "Name of the extension."
+  },
+  "extensionDescription": {
+    "message": "Enabler for systrade app, the bitcoin trade web client.",
+    "description": "Description of the extension."
+  },
+  "homepageUrl": {
+    "message": "https://hinaser.github.io/-/contents/systrade-extension_en.html"
+  },
+  "status": {
+    "message": "Status"
+  },
+  "inactive": {
+    "message": "INACTIVE"
+  },
+  "active": {
+    "message": "ACTIVE"
+  },
+  "inactiveMessage": {
+    "message": "SysTrade app is not recognized on this page."
+  },
+  "activeMessage": {
+    "message": "The update frequency of board/execution is significantly improved!"
+  }
+}

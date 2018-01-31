@@ -1,0 +1,15 @@
+{
+  "name": "systrade-webextension",
+  "version": "0.0.1",
+  "main": "index.js",
+  "repository": "https://github.com/Hinaser/systrade-webextension.git",
+  "author": "Hinaser <rindo.hinase@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "web-ext run --source-dir ./src"
+  },
+  "devDependencies": {
+    "web-ext": "^2.3.2"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "manifest_version": 2,
+  "name": "__MSG_extensionName__",
+  "version": "0.0.3",
+
+  "default_locale": "en",
+  "description": "__MSG_extensionDescription__",
+  "icons": {"128": "icon128.png"},
+
+  "browser_action": {
+    "default_title": "SysTrade"
+  },
+
+  "background": {
+    "scripts": ["background/index.js"],
+    "persistent": true
+  },
+
+  "author": "Hinaser",
+  "content_scripts": [{
+    "matches": ["*://hinaser.github.io/*", "*://localhost/*"],
+    "js": ["content-script/index.js"],
+    "run_at": "document_start"
+  }],
+  "externally_connectable": {
+    "matches": ["*://hinaser.github.io/*", "*://localhost/*"]
+  },
+  "homepage_url": "https://hinaser.github.io/-/contents/systrade-extension_ja.html",
+  "incognito": "spanning",
+  "minimum_chrome_version": "47",
+  "offline_enabled": false,
+  "permissions": [
+    "webRequest",
+    "webRequestBlocking",
+    "webNavigation",
+    "tabs",
+    "*://*.bitflyer.jp/*",
+    "*://localhost/*",
+    "*://hinaser.github.io/*"
+  ],
+  "short_name": "systrade",
+  "version_name": "0.0.3 public alpha",
+  "web_accessible_resources": []
+}

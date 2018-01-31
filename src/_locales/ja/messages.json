@@ -1,0 +1,28 @@
+{
+  "extensionName": {
+    "message": "SysTrade",
+    "description": "Name of the extension."
+  },
+  "extensionDescription": {
+    "message": "SysTradeサービスの板情報、約定履歴データの更新速度が大幅に向上します。",
+    "description": "Description of the extension."
+  },
+  "homepageUrl": {
+    "message": "https://hinaser.github.io/-/contents/systrade-extension_ja.html"
+  },
+  "status": {
+    "message": "ステータス"
+  },
+  "inactive": {
+    "message": "無効"
+  },
+  "active": {
+    "message": "有効"
+  },
+  "inactiveMessage": {
+    "message": "SysTradeアプリが認識されていません"
+  },
+  "activeMessage": {
+    "message": "SysTradeアプリが認識されました。板情報、約定履歴の更新速度が大幅に向上しています。"
+  }
+}
