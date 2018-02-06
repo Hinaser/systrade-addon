@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "__MSG_extensionName__",
-  "version": "0.0.4",
+  "version": "0.0.6",
 
   "default_locale": "en",
   "description": "__MSG_extensionDescription__",
@@ -34,11 +34,9 @@
     "webRequestBlocking",
     "webNavigation",
     "tabs",
-    "*://*.bitflyer.jp/*",
-    "*://localhost/*",
-    "*://hinaser.github.io/*"
+    "*://*/*"
   ],
   "short_name": "systrade",
-  "version_name": "0.0.4 public alpha",
+  "version_name": "0.0.6 public alpha",
   "web_accessible_resources": []
 }
