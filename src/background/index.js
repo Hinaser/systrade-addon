@@ -7,8 +7,17 @@ const defaultTargetUrls = [
 ];
 let targetUrls = defaultTargetUrls;
 
+let targetTabIds = {};
+
 const rewriteHeader = function(details) {
   let responseHeaders = details.responseHeaders;
+  let tabId = details.tabId;
+  
+  // If the request was not issued from target tabs,
+  // just pass through.
+  if(!targetTabIds.hasOwnProperty(tabId)){
+    return {responseHeaders};
+  }
   
   responseHeaders = responseHeaders.filter(function(h){
     return ![
@@ -66,13 +75,17 @@ const isTargetTab = function(tab){
   });
 };
 
-const setActivePopup = () => {
+const setActivePopup = (tabId) => {
   chrome.browserAction.setIcon({path: "../icon128_active.png"});
   chrome.browserAction.setPopup({popup: "../popup/active.html"});
+  
+  targetTabIds[tabId] = true;
 };
-const setInactivePopup = () => {
+const setInactivePopup = (tabId) => {
   chrome.browserAction.setIcon({path: "../icon128_inactive.png"});
   chrome.browserAction.setPopup({popup: "../popup/inactive.html"});
+  
+  delete targetTabIds[tabId];
 };
 
 let main = function(){
@@ -80,8 +93,12 @@ let main = function(){
   
   chrome.tabs.onActivated.addListener(function(activeInfo){
     chrome.tabs.get(activeInfo.tabId, function(tab){
-      isTargetTab(tab) ? setActivePopup() : setInactivePopup();
+      isTargetTab(tab) ? setActivePopup(tab.id) : setInactivePopup(tab.id);
     });
+  });
+  
+  chrome.tabs.onRemoved.addListener(function(tabId, removeInfo){
+    setInactivePopup(tabId);
   });
   
   chrome.webNavigation.onCommitted.addListener(function(details){
@@ -91,12 +108,12 @@ let main = function(){
       return new RegExp(t, "g").test(details.url);
     });
     
-    isTargetUrl ? setActivePopup() : setInactivePopup();
+    isTargetUrl ? setActivePopup(details.tabId) : setInactivePopup(details.tabId);
   });
   
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
     let tab = tabs[0];
-    isTargetTab(tab) ? setActivePopup() : setInactivePopup();
+    isTargetTab(tab) ? setActivePopup(tab.id) : setInactivePopup(tab.id);
   });
   
   chrome.tabs.query({}, function(tabs){

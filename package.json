@@ -1,6 +1,6 @@
 {
-  "name": "systrade-webextension",
-  "version": "0.0.1",
+  "name": "systrade-addon",
+  "version": "0.0.6",
   "main": "index.js",
   "repository": "https://github.com/Hinaser/systrade-webextension.git",
   "author": "Hinaser <rindo.hinase@gmail.com>",
