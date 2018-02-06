@@ -1,4 +1,4 @@
-const defaultApiServerUrls = ["*://*.bitflyer.jp/*"];
+const defaultApiServerUrls = ["*://*/*"];
 let apiServerUrls = defaultApiServerUrls;
 
 const defaultTargetUrls = [
@@ -105,7 +105,6 @@ let main = function(){
         return new RegExp(t, "g").test(tab.url);
       });
     }).forEach(function(tab){
-      console.log(tab);
       chrome.tabs.executeScript(tab.id, {
         code: "window.postMessage({type: 'YES_I_M_HERE'}, window.location.toString());"
       });
