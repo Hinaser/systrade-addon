@@ -1,22 +1,54 @@
-const defaultApiServerUrls = ["*://*/*"];
-let apiServerUrls = defaultApiServerUrls;
+const defaultValue = {
+  urlsToRewriteHeader: ["*://*/*"],
+  pageUrlsToActivateAddon: [
+    "^http[s]?://localhost(:[0-9]*)?(/.*|/?)$",
+    "^http[s]?://hinaser\.github\.io/systrade-web(/.*|/?)"
+  ],
+  remoteUrlWhiteList: ["^http[s]?://.*\.bitflyer\.jp(/.*|/?)$"],
+  remoteUrlBlackList: [],
+};
 
-const defaultTargetUrls = [
-  "^http[s]?://localhost(:[0-9]*)?(/.*|/?)$",
-  "http[s]?://hinaser\.github\.io/systrade-web(/.*|/?)"
-];
-let targetUrls = defaultTargetUrls;
+let urlsToRewriteHeader = defaultValue.urlsToRewriteHeader;
+let pageUrlsToActivateAddon = defaultValue.pageUrlsToActivateAddon;
 
-let targetTabIds = {};
+let remoteUrlWhiteList = defaultValue.remoteUrlWhiteList;
+let remoteUrlBlackList = defaultValue.remoteUrlBlackList;
 
-const rewriteHeader = function(details) {
+let activatedTabIds = new Set();
+let requestIdsMonitored = {}; // I once considered to use `new Map()` but turned it down as it is too slow.
+
+const captureRequestingHeader = function(details){
+  let tabId = details.tabId;
+  if(!activatedTabIds.has(tabId)){
+    return;
+  }
+  
+  const requestHeaders = details.requestHeaders.find(h => h.name.toLowerCase() === "access-control-request-headers");
+  if(requestHeaders){
+    requestIdsMonitored[details.requestId] = requestHeaders.value
+  }
+};
+
+const rewriteResponseHeader = function(details) {
   let responseHeaders = details.responseHeaders;
   let tabId = details.tabId;
   
   // If the request was not issued from target tabs,
   // just pass through.
-  if(!targetTabIds.hasOwnProperty(tabId)){
+  if(!activatedTabIds.has(tabId)){
     return {responseHeaders};
+  }
+  
+  let allowOrigin = {name: "Access-Control-Allow-Origin", value: "*"};
+  let allowMethods = {name: "Access-Control-Allow-Methods", value: "GET, PATCH, PUT, POST, DELETE, HEAD, OPTIONS"};
+  let allowHeaders = {name: "Access-Control-Allow-Headers", value: "*"};
+  
+  if(requestIdsMonitored.hasOwnProperty(details.requestId)){
+    allowHeaders.value = requestIdsMonitored[details.requestId] || "*";
+    delete requestIdsMonitored[details.requestId];
+  }
+  else{
+    allowHeaders = null;
   }
   
   responseHeaders = responseHeaders.filter(function(h){
@@ -27,11 +59,9 @@ const rewriteHeader = function(details) {
     ].includes(h.name.toLowerCase());
   });
   
-  responseHeaders = responseHeaders.concat([
-    {name: "Access-Control-Allow-Origin", value: "*"},
-    {name: "Access-Control-Allow-Methods", value: "*"},
-    {name: "Access-Control-Allow-Headers", value: "*"}
-  ]);
+  allowOrigin && responseHeaders.push(allowOrigin);
+  allowMethods && responseHeaders.push(allowMethods);
+  allowHeaders && responseHeaders.push(allowHeaders);
   
   return {responseHeaders};
 };
@@ -45,9 +75,15 @@ const onMessageFromExternal = function(message, sender, sendResponse) {
 };
 
 const load = function(){
+  chrome.webRequest.onBeforeSendHeaders.addListener(
+    captureRequestingHeader,
+    {urls: urlsToRewriteHeader},
+    ["blocking", "requestHeaders"]
+  );
+  
   chrome.webRequest.onHeadersReceived.addListener(
-    rewriteHeader,
-    {urls: apiServerUrls},
+    rewriteResponseHeader,
+    {urls: urlsToRewriteHeader},
     ["blocking", "responseHeaders"]
   );
   
@@ -55,13 +91,17 @@ const load = function(){
 };
 
 const unload = function(){
-  if(chrome.webRequest.onHeadersReceived.hasListener(rewriteHeader)){
-    chrome.webRequest.onHeadersReceived.removeListener(rewriteHeader);
-  }
+  const onBeforeSendHeaders = chrome.webRequest.onBeforeSendHeaders;
+  onBeforeSendHeaders.hasListener(captureRequestingHeader) &&
+  onBeforeSendHeaders.removeListener(captureRequestingHeader);
   
-  if(chrome.runtime.onMessageExternal.hasListener(onMessageFromExternal)){
-    chrome.runtime.onMessageExternal.removeListener(onMessageFromExternal);
-  }
+  const onHeadersReceived = chrome.webRequest.onHeadersReceived;
+  onHeadersReceived.hasListener(rewriteResponseHeader) &&
+  onHeadersReceived.removeListener(rewriteResponseHeader);
+  
+  const onMessageExternal = chrome.runtime.onMessageExternal;
+  onMessageExternal.hasListener(onMessageFromExternal) &&
+  onMessageExternal.removeListener(onMessageFromExternal);
 };
 
 const reload = function(){
@@ -70,7 +110,7 @@ const reload = function(){
 };
 
 const isTargetTab = function(tab){
-  return targetUrls.some(function(t){
+  return pageUrlsToActivateAddon.some(function(t){
     return new RegExp(t, "g").test(tab.url);
   });
 };
@@ -79,13 +119,13 @@ const setActivePopup = (tabId) => {
   chrome.browserAction.setIcon({path: "../icon128_active.png"});
   chrome.browserAction.setPopup({popup: "../popup/active.html"});
   
-  targetTabIds[tabId] = true;
+  activatedTabIds.add(tabId);
 };
 const setInactivePopup = (tabId) => {
   chrome.browserAction.setIcon({path: "../icon128_inactive.png"});
   chrome.browserAction.setPopup({popup: "../popup/inactive.html"});
   
-  delete targetTabIds[tabId];
+  activatedTabIds.delete(tabId);
 };
 
 let main = function(){
@@ -104,7 +144,7 @@ let main = function(){
   chrome.webNavigation.onCommitted.addListener(function(details){
     if(details.frameId !== 0) return;
     
-    let isTargetUrl = targetUrls.some(function(t){
+    let isTargetUrl = pageUrlsToActivateAddon.some(function(t){
       return new RegExp(t, "g").test(details.url);
     });
     
@@ -118,7 +158,7 @@ let main = function(){
   
   chrome.tabs.query({}, function(tabs){
     tabs.filter(function(tab){
-      return targetUrls.some(function(t){
+      return pageUrlsToActivateAddon.some(function(t){
         return new RegExp(t, "g").test(tab.url);
       });
     }).forEach(function(tab){
