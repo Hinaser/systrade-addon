@@ -109,9 +109,9 @@ const reload = function(){
   load();
 };
 
-const isTargetTab = function(tab){
+const isTargetTab = function(url){
   return pageUrlsToActivateAddon.some(function(t){
-    return new RegExp(t, "g").test(tab.url);
+    return new RegExp(t, "g").test(url);
   });
 };
 
@@ -128,45 +128,59 @@ const setInactivePopup = (tabId) => {
   activatedTabIds.delete(tabId);
 };
 
-let main = function(){
-  reload();
+const init = () => {
+  chrome.tabs.onRemoved.addListener(function(tabId, removeInfo){
+    setInactivePopup(tabId);
+  });
   
   chrome.tabs.onActivated.addListener(function(activeInfo){
     chrome.tabs.get(activeInfo.tabId, function(tab){
-      isTargetTab(tab) ? setActivePopup(tab.id) : setInactivePopup(tab.id);
+      if(tab && tab.url){
+        isTargetTab(tab.url) ? setActivePopup(tab.id) : setInactivePopup(tab.id);
+      }
     });
   });
   
-  chrome.tabs.onRemoved.addListener(function(tabId, removeInfo){
-    setInactivePopup(tabId);
+  chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab){
+    if(tab.url){
+      isTargetTab(tab.url) ? setActivePopup(tab.id) : setInactivePopup(tab.id);
+    }
   });
   
   chrome.webNavigation.onCommitted.addListener(function(details){
     if(details.frameId !== 0) return;
     
-    let isTargetUrl = pageUrlsToActivateAddon.some(function(t){
-      return new RegExp(t, "g").test(details.url);
+    isTargetTab(details.url) ? setActivePopup(details.tabId) : setInactivePopup(details.tabId);
+  });
+  
+  chrome.tabs.query({active: false}, function(tabs){
+    tabs.forEach(tab => {
+      isTargetTab(tab.url) ? setActivePopup(tab.id) : setInactivePopup(tab.id);
     });
-    
-    isTargetUrl ? setActivePopup(details.tabId) : setInactivePopup(details.tabId);
   });
   
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
     let tab = tabs[0];
-    isTargetTab(tab) ? setActivePopup(tab.id) : setInactivePopup(tab.id);
+    isTargetTab(tab.url) ? setActivePopup(tab.id) : setInactivePopup(tab.id);
   });
-  
+};
+
+const wakeThemUp = () => {
   chrome.tabs.query({}, function(tabs){
-    tabs.filter(function(tab){
-      return pageUrlsToActivateAddon.some(function(t){
-        return new RegExp(t, "g").test(tab.url);
-      });
-    }).forEach(function(tab){
-      chrome.tabs.executeScript(tab.id, {
-        code: "window.postMessage({type: 'YES_I_M_HERE'}, window.location.toString());"
-      });
+    tabs.forEach(function(tab){
+      if(isTargetTab(tab.url)){
+        chrome.tabs.executeScript(tab.id, {
+          code: "window.postMessage({type: 'YES_I_M_HERE'}, window.location.toString());"
+        });
+      }
     });
   })
+};
+
+let main = function(){
+  reload();
+  init();
+  wakeThemUp();
 };
 
 main();

@@ -1,9 +1,9 @@
 window.addEventListener("message", function(event){
-  if(event.source !== window){
+  if(event.source !== window || !event.data.type){
     return;
   }
   
-  if(event.data.type && event.data.type === "ARE_YOU_THERE"){
+  if(event.data.type === "ARE_YOU_THERE"){
     event.source.postMessage({
       type: "YES_I_M_HERE",
     }, event.origin);
