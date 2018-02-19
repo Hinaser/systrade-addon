@@ -12,7 +12,12 @@
   },
 
   "background": {
-    "scripts": ["background/index.js"],
+    "scripts": [
+      "background/Store.js",
+      "background/HttpHandler.js",
+      "background/TabMonitor.js",
+      "background/index.js"
+    ],
     "persistent": true
   },
 
