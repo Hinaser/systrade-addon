@@ -39,6 +39,8 @@
     "webRequestBlocking",
     "webNavigation",
     "tabs",
+    "storage",
+    "unlimitedStorage",
     "*://*/*"
   ],
   "short_name": "systrade",

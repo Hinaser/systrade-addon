@@ -49,11 +49,16 @@ class TabMonitor {
     });
   
     chrome.tabs.onActivated.addListener(function(activeInfo){
-      chrome.tabs.get(activeInfo.tabId, function(tab){
-        if(tab && tab.url){
-          that.isTargetTab(tab.url) ? that.activateTab(tab.id) : that.deactivateTab(tab.id);
-        }
-      });
+      try{
+        chrome.tabs.get(activeInfo.tabId, function(tab){
+          if(tab && tab.url){
+            that.isTargetTab(tab.url) ? that.activateTab(tab.id) : that.deactivateTab(tab.id);
+          }
+        });
+      }
+      // On window closing, tabs would be activated one by one as next tab has closed.
+      // This try-catch statement is just brought to suppress error messages
+      catch(e){}
     });
   
     chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab){
@@ -80,14 +85,16 @@ class TabMonitor {
     });
   }
   
-  wakeThemUp(){
+  wakeThemUp(state){
     const that = this;
-    
+    state = JSON.stringify(state);
+    state = JSON.stringify(state); // Stringify string to make content script code from strings.
+  
     chrome.tabs.query({}, function(tabs){
       tabs.forEach(function(tab){
         if(that.isTargetTab(tab.url)){
           chrome.tabs.executeScript(tab.id, {
-            code: "window.postMessage({type: 'YES_I_M_HERE'}, window.location.toString());"
+            code: `window.postMessage({type: "YES_I_M_HERE", state: ${state}}, window.location.origin);`
           });
         }
       });

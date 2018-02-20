@@ -24,14 +24,21 @@ let main = function(){
   
   const store = new Store();
   
-  tabMonitor.onTabStateChange(targetTabIds => {
-    httpHandler.updateProps({targetTabIds});
-  });
-  
-  httpHandler.startMonitor();
-  store.startMonitor();
-  tabMonitor.startMonitor();
-  tabMonitor.wakeThemUp();
+  store.loadState()
+    .then(state => {
+      tabMonitor.onTabStateChange(targetTabIds => {
+        httpHandler.updateProps({targetTabIds});
+        store.updateProps({targetTabIds});
+      });
+    
+      httpHandler.startMonitor();
+      store.startMonitor();
+      tabMonitor.startMonitor();
+      tabMonitor.wakeThemUp(state);
+    })
+    .catch(err => {
+      console.error(err);
+    });
 };
 
 main();
