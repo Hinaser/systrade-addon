@@ -6,6 +6,7 @@ class TabMonitor {
     
     this.state = {
       targetTabIds: new Set(),
+      activeTabId: -1
     };
   }
   
@@ -26,11 +27,13 @@ class TabMonitor {
   };
   
   activateTab(tabId){
-    chrome.browserAction.setIcon({path: "../icon128_active.png"});
-    chrome.browserAction.setPopup({popup: "../popup/active.html"});
+    if(tabId === this.state.activeTabId){
+      chrome.browserAction.setIcon({path: "../icon128_active.png"});
+      chrome.browserAction.setPopup({popup: "../popup/active.html"});
+    }
     
     this.state.targetTabIds.add(tabId);
-    this.props.listeners.forEach(cb => cb(this.state.targetTabIds))
+    this.props.listeners.forEach(cb => cb(this.state.targetTabIds));
   }
   
   deactivateTab(tabId){
@@ -50,6 +53,8 @@ class TabMonitor {
   
     chrome.tabs.onActivated.addListener(function(activeInfo){
       try{
+        that.state.activeTabId = activeInfo.tabId;
+        
         chrome.tabs.get(activeInfo.tabId, function(tab){
           if(tab && tab.url){
             that.isTargetTab(tab.url) ? that.activateTab(tab.id) : that.deactivateTab(tab.id);
