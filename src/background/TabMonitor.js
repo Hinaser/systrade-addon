@@ -27,18 +27,24 @@ class TabMonitor {
   };
   
   activateTab(tabId){
-    if(tabId === this.state.activeTabId){
-      chrome.browserAction.setIcon({path: "../icon128_active.png"});
-      chrome.browserAction.setPopup({popup: "../popup/active.html"});
+    if(this.state.targetTabIds.size > 0 && !this.state.targetTabIds.has(tabId)){
+      chrome.browserAction.setIcon({path: "../icon128_inactive.png"});
+      chrome.browserAction.setPopup({popup: "../popup/warning/index.html"});
+      return;
     }
     
+    if(tabId === this.state.activeTabId){
+      chrome.browserAction.setIcon({path: "../icon128_active.png"});
+      chrome.browserAction.setPopup({popup: "../popup/active/index.html"});
+    }
+  
     this.state.targetTabIds.add(tabId);
     this.props.listeners.forEach(cb => cb(this.state.targetTabIds));
   }
   
   deactivateTab(tabId){
     chrome.browserAction.setIcon({path: "../icon128_inactive.png"});
-    chrome.browserAction.setPopup({popup: "../popup/inactive.html"});
+    chrome.browserAction.setPopup({popup: "../popup/inactive/index.html"});
   
     this.state.targetTabIds.delete(tabId);
     this.props.listeners.forEach(cb => cb(this.state.targetTabIds))

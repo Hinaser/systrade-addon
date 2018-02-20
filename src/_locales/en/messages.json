@@ -19,10 +19,16 @@
   "active": {
     "message": "ACTIVE"
   },
+  "warning": {
+    "message": "WARNING"
+  },
   "inactiveMessage": {
     "message": "SysTrade app is not recognized on this page."
   },
   "activeMessage": {
     "message": "The update frequency of board/execution is significantly improved!"
+  },
+  "warningMessage": {
+    "message": "There is already a tab which runs SysTrade. Addon won't work in this tab."
   }
 }
