@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "__MSG_extensionName__",
-  "version": "0.0.7",
+  "version": "0.0.8",
 
   "default_locale": "en",
   "description": "__MSG_extensionDescription__",
@@ -12,7 +12,12 @@
   },
 
   "background": {
-    "scripts": ["background/index.js"],
+    "scripts": [
+      "background/Store.js",
+      "background/HttpHandler.js",
+      "background/TabMonitor.js",
+      "background/index.js"
+    ],
     "persistent": true
   },
 
@@ -34,9 +39,11 @@
     "webRequestBlocking",
     "webNavigation",
     "tabs",
+    "storage",
+    "unlimitedStorage",
     "*://*/*"
   ],
   "short_name": "systrade",
-  "version_name": "0.0.7 public alpha",
+  "version_name": "0.0.8 public alpha",
   "web_accessible_resources": []
 }

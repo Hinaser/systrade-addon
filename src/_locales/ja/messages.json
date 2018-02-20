@@ -19,10 +19,16 @@
   "active": {
     "message": "有効"
   },
+  "warning": {
+    "message": "注意"
+  },
   "inactiveMessage": {
     "message": "SysTradeアプリが認識されていません"
   },
   "activeMessage": {
     "message": "SysTradeアプリが認識されました。板情報、約定履歴の更新速度が大幅に向上しています。"
+  },
+  "warningMessage": {
+    "message": "他のタブで既にSysTradeアプリが起動しています。このタブではアドオンは有効になりません。"
   }
 }
