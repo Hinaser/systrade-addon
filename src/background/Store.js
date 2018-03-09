@@ -73,6 +73,8 @@ class Store {
     
     if(message.type === "INIT_STATE"){
       const init_state = message.data;
+      
+      chrome.tabs.sendMessage(sender.tab.id, {type: "BACKGROUND_STATE", data: this.state});
   
       if(typeof(init_state||undefined) !== "object"
         || typeof(init_state.main||undefined) !== "object"
