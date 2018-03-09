@@ -7,7 +7,7 @@
 
   "manifest_version": 2,
   "name": "__MSG_extensionName__",
-  "version": "0.0.9",
+  "version": "0.0.10",
 
   "default_locale": "en",
   "description": "__MSG_extensionDescription__",
@@ -50,6 +50,6 @@
     "*://*/*"
   ],
   "short_name": "systrade",
-  "version_name": "0.0.9 public alpha",
+  "version_name": "0.0.10 public alpha",
   "web_accessible_resources": []
 }
