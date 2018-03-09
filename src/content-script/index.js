@@ -1,3 +1,14 @@
+function onMessageFromBackground(message, sender, sendResponse){
+  if(message.type === "BACKGROUND_STATE"){
+    window.postMessage({
+      type: "YES_I_M_HERE",
+      state: message.data,
+    }, window.origin)
+  }
+}
+
+chrome.runtime.onMessage.addListener(onMessageFromBackground);
+
 window.addEventListener("message", function(event){
   if(event.source !== window || !event.data.type){
     return;
@@ -7,18 +18,6 @@ window.addEventListener("message", function(event){
     chrome.runtime.sendMessage({
       type: "INIT_STATE",
       data: event.data.data,
-    });
-    
-    chrome.storage.local.get("state", value => {
-      let state;
-      if(typeof(value||undefined) === "object"){
-        state = value.state;
-      }
-      
-      event.source.postMessage({
-        type: "YES_I_M_HERE",
-        state,
-      }, event.origin);
     });
   }
   else if(event.data.type === "SNAPSHOT"
